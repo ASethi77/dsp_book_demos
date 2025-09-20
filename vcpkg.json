@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "dependencies": [
+    "boost-system",
+    {
+      "name": "imgui",
+      "features": [
+        "sdl2-binding",
+        "sdl2-renderer-binding",
+        "opengl3-binding"
+      ]
+    },
+    "implot"
+  ]
+}

@@ -1,0 +1,9 @@
+add_subdirectory(
+    reference_implot_demo
+)
+add_subdirectory(
+    floating_point_error_demo
+)
+add_subdirectory(
+    signal_decomposition_demo
+)
