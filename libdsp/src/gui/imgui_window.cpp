@@ -1,4 +1,4 @@
-#include "imgui_window.h"
+#include "gui/imgui_window.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -156,6 +156,42 @@ namespace dsp::gui
         _sdlInputEventHandlers = handlers;
     }
 
+    void ImguiWindow::run()
+    {
+        _done = false;
+        ImVec4 clear_color = ImVec4(0.f, 0.f, 0.f, 1.00f);
+        while (!_done)
+        {
+
+            ImGuiIO& io = ImGui::GetIO();
+            processInputEvents();
+            if (SDL_GetWindowFlags(getWindow()) & SDL_WINDOW_MINIMIZED)
+            {
+                SDL_Delay(10);
+                continue;
+            }
+
+            // Start the Dear ImGui frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplSDL2_NewFrame();
+            ImGui::NewFrame();
+
+            if (!_done && _imguiContextEventHandlers.on_step)
+            {
+                bool step_result = _imguiContextEventHandlers.on_step();
+                _done = step_result == false;
+            }
+
+            // Rendering
+            ImGui::Render();
+            glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
+            glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+            glClear(GL_COLOR_BUFFER_BIT);
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            SDL_GL_SwapWindow(getWindow());
+        }
+    }
+
     void ImguiWindow::processInputEvents()
     {
         // Poll and handle events (inputs, window resize, etc.)
@@ -173,6 +209,7 @@ namespace dsp::gui
                 {
                     _sdlInputEventHandlers.on_quit();
                 }
+                _done = true;
             }
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(_window))
             {
@@ -180,15 +217,9 @@ namespace dsp::gui
                 {
                     _sdlInputEventHandlers.on_window_close();
                 }
+                _done = true;
             }
         }
-        // if (SDL_GetWindowFlags(_window) & SDL_WINDOW_MINIMIZED)
-        // {
-        //     if (_sdlInputEventHandlers.on_window_minimized)
-        //     {
-        //         _sdlInputEventHandlers.on_window_minimized();
-        //     }
-        // }
     }
 
 

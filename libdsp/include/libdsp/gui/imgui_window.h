@@ -24,6 +24,7 @@ namespace dsp::gui
     {
         std::function<void(void)> on_imgui_context_created;
         std::function<void(void)> on_imgui_context_destroyed;
+        std::function<bool(void)> on_step;
     };
 
     struct SDLInputEventHandlers
@@ -46,6 +47,7 @@ namespace dsp::gui
         void setImguiContextEventHandlers(const ImguiContextEventHandlers& handlers);
         void setSDLInputEventHandlers(const SDLInputEventHandlers& handlers);
         void processInputEvents();
+        void run();
 
         SDL_Window* getWindow();
         SDL_GLContext getGLContext();
@@ -57,6 +59,7 @@ namespace dsp::gui
         SDLInputEventHandlers _sdlInputEventHandlers;
         std::string _windowTitle;
         float _dpiScale = 1.5f;
+        bool _done = false;
     };
 }
 
