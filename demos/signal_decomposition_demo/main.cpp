@@ -2,6 +2,7 @@
 #include "implot.h"
 
 #include <iostream>
+#include <numeric>
 
 namespace
 {
@@ -14,6 +15,53 @@ namespace
     {
         ImPlot::DestroyContext();
     }
+
+    double RandomGauss() {
+        static double V1, V2, S;
+        static int phase = 0;
+        double X;
+        if(phase == 0) {
+            do {
+                double U1 = (double)rand() / RAND_MAX;
+                double U2 = (double)rand() / RAND_MAX;
+                V1 = 2 * U1 - 1;
+                V2 = 2 * U2 - 1;
+                S = V1 * V1 + V2 * V2;
+            } while(S >= 1 || S == 0);
+
+            X = V1 * sqrt(-2 * log(S) / S);
+        } else
+            X = V2 * sqrt(-2 * log(S) / S);
+        phase = 1 - phase;
+        return X;
+    }
+
+    template <int N>
+    struct NormalDistribution {
+        NormalDistribution(double mean, double sd) {
+            for (int i = 0; i < N; ++i)
+                Data[i] = RandomGauss()*sd + mean;
+        }
+        double Min() const
+        {
+            double min = std::numeric_limits<double>::max();
+            for (int i = 0; i < N; ++i)
+            {
+                min = std::min(Data[i], min);
+            }
+            return min;
+        }
+        double Max() const
+        {
+            double max = std::numeric_limits<double>::min();
+            for (int i = 0; i < N; ++i)
+            {
+                max = std::max(Data[i], max);
+            }
+            return max;
+        }
+        double Data[N];
+    };
 }
 
 struct AppState
@@ -23,52 +71,97 @@ struct AppState
     bool show_plot_window = true;
 };
 
+void Demo_LinePlots()
+{
+    constexpr int NUM_POINTS = 25;
+    static NormalDistribution<NUM_POINTS> originalSamples(0, 0.2);
+    static ImPlotDragToolFlags flags = ImPlotDragToolFlags_None;
+    static ImPlotSubplotFlags subplotFlags = ImPlotSubplotFlags_None;
+    std::array<double, NUM_POINTS> xLabels{};
+    std::iota(xLabels.begin(), xLabels.end(), 1);
+
+    ImGui::BulletText("Modify signal samples by clicking and dragging them.");
+    if (ImPlot::BeginPlot("Original Sample")) {
+        ImPlot::SetupAxes("Sample Number","Voltage");
+        ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+        for (int i = 0; i < NUM_POINTS; ++i)
+        {
+            ImPlot::DragPoint(i, &xLabels[i], &originalSamples.Data[i], ImVec4(1, 1, 1, 1), 4, flags);
+        }
+        ImPlot::PlotLine("v(t)", xLabels.data(), &originalSamples.Data[0], NUM_POINTS);
+        ImPlot::EndPlot();
+    }
+
+    ImGui::Spacing();
+    ImGui::BulletText("The subplots below show the even/odd decomposition of the input signal");
+
+    std::array<double, NUM_POINTS> evenDecomposition = {0};
+    std::array<double, NUM_POINTS> oddDecomposition = {0};
+    std::pair<double, double> minMaxEven;
+    std::pair<double, double> minMaxOdd;
+    for (int i = 0; i < NUM_POINTS; ++i)
+    {
+        double evenDecomp = (originalSamples.Data[i] + originalSamples.Data[NUM_POINTS - i]) / 2.f;
+        double oddDecomp = (originalSamples.Data[i] - originalSamples.Data[NUM_POINTS - i]) / 2.f;
+        evenDecomposition[i] = evenDecomp;
+        minMaxEven.first = std::min(minMaxEven.first, evenDecomp);
+        minMaxEven.second = std::max(minMaxEven.second, evenDecomp);
+        oddDecomposition[i] = oddDecomp;
+        minMaxOdd.first = std::min(minMaxOdd.first, oddDecomp);
+        minMaxOdd.second = std::max(minMaxOdd.second, oddDecomp);
+    }
+    if (ImPlot::BeginSubplots("Even/Odd Decomposition", 1, 2, {-1, 400}, subplotFlags))
+    {
+        if (ImPlot::BeginPlot("Even Decomposition"))
+        {
+            ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+            ImPlot::SetupAxesLimits(xLabels[0], xLabels[NUM_POINTS - 1],
+                std::min(minMaxEven.first, minMaxOdd.first),
+                std::max(minMaxEven.second, minMaxOdd.second));
+            ImPlot::PlotLine("v(t)", xLabels.data(), evenDecomposition.data(), NUM_POINTS);
+        }
+        ImPlot::EndPlot();
+        if (ImPlot::BeginPlot("Odd Decomposition"))
+        {
+            ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+            ImPlot::SetupAxesLimits(xLabels[0], xLabels[NUM_POINTS - 1],
+            std::min(minMaxEven.first, minMaxOdd.first),
+            std::max(minMaxEven.second, minMaxOdd.second));
+            ImPlot::PlotLine("v(t)", xLabels.data(), oddDecomposition.data(), NUM_POINTS);
+        }
+        ImPlot::EndPlot();
+    }
+    ImPlot::EndSubplots();
+}
+
 bool appStep(AppState& state)
 {
     auto& [show_demo_window, show_another_window, show_plot_window] = state;
     auto& io = ImGui::GetIO();
     ImVec4 clear_color = ImVec4(0.f, 0.f, 0.f, 1.00f);
 
-    // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
     if (show_plot_window)
-        ImPlot::ShowDemoWindow(&show_plot_window);
-
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
     {
-        static float f = 0.0f;
-        static int counter = 0;
-
-        ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
-
-        ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-        ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
-        ImGui::Checkbox("Another Window", &show_another_window);
-
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-        ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-        if (ImGui::Button("Button"))
-            // Buttons return true when clicked (most widgets return true when edited/activated)
-            counter++;
-        ImGui::SameLine();
-        ImGui::Text("counter = %d", counter);
-
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::End();
+        ImPlot::ShowDemoWindow();
     }
 
-    // 3. Show another simple window.
-    if (show_another_window)
+    if (show_demo_window)
     {
-        ImGui::Begin("Another Window", &show_another_window);
-        // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-        ImGui::Text("Hello from another window!");
-        if (ImGui::Button("Close Me"))
-            show_another_window = false;
-        ImGui::End();
+        ImGui::ShowDemoWindow();
     }
+
+    ImGui::Begin("Filter Even/Odd Decomposition Demo");
+
+    if (ImGui::CollapsingHeader("Demo Description"))
+    {
+        ImGui::TextWrapped("This demonstration shows you what it's like to decompose an input signal into even/odd signals.");
+    }
+    if (ImGui::CollapsingHeader("Sample Signals"))
+    {
+        Demo_LinePlots();
+    }
+
+    ImGui::End();
 
     return true;
 }
