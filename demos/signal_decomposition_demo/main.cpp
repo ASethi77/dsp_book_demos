@@ -78,7 +78,7 @@ void Demo_LinePlots()
     static ImPlotDragToolFlags flags = ImPlotDragToolFlags_None;
     static ImPlotSubplotFlags subplotFlags = ImPlotSubplotFlags_None;
     std::array<double, NUM_POINTS> xLabels{};
-    std::iota(xLabels.begin(), xLabels.end(), 1);
+    std::iota(xLabels.begin(), xLabels.end(), 0);
 
     ImGui::BulletText("Modify signal samples by clicking and dragging them.");
     if (ImPlot::BeginPlot("Original Sample")) {
@@ -116,8 +116,8 @@ void Demo_LinePlots()
         {
             ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
             ImPlot::SetupAxesLimits(xLabels[0], xLabels[NUM_POINTS - 1],
-                std::min(minMaxEven.first, minMaxOdd.first),
-                std::max(minMaxEven.second, minMaxOdd.second));
+                std::min(minMaxEven.first, minMaxOdd.first) - 0.25,
+                std::max(minMaxEven.second, minMaxOdd.second) + 0.25);
             ImPlot::PlotLine("v(t)", xLabels.data(), evenDecomposition.data(), NUM_POINTS);
         }
         ImPlot::EndPlot();
@@ -125,8 +125,8 @@ void Demo_LinePlots()
         {
             ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
             ImPlot::SetupAxesLimits(xLabels[0], xLabels[NUM_POINTS - 1],
-            std::min(minMaxEven.first, minMaxOdd.first),
-            std::max(minMaxEven.second, minMaxOdd.second));
+            std::min(minMaxEven.first, minMaxOdd.first) - 0.25,
+            std::max(minMaxEven.second, minMaxOdd.second) + 0.25);
             ImPlot::PlotLine("v(t)", xLabels.data(), oddDecomposition.data(), NUM_POINTS);
         }
         ImPlot::EndPlot();
