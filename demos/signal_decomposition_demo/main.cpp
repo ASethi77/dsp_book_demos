@@ -1,3 +1,5 @@
+#include <format>
+
 #include "libdsp/gui/imgui_window.h"
 #include "libdsp/storage/buffer.h"
 #include "libdsp/statistics/buffer_stats_helpers.h"
@@ -105,7 +107,6 @@ void Demo_LinePlots(AppState& state)
 
     dsp::StaticBuffer<double, NUM_POINTS> evenDecompBuffer = {0};
     dsp::StaticBuffer<double, NUM_POINTS> oddDecompBuffer = {0};
-    std::pair<double, double> minMaxOdd;
     for (int i = 0; i < NUM_POINTS; ++i)
     {
         double evenDecomp = (samples._data[i] + samples._data[NUM_POINTS - i]) / 2.f;
@@ -172,6 +173,20 @@ bool appStep(AppState& state)
 // Main code
 int main(int, char**)
 {
+    dsp::StaticBuffer<double, 10> myBuf = {
+        {0, 1, 2, 3, 4}
+    };
+    // for (int i = 0; i < 10; ++i)
+    // {
+    //     myBuf[i] = i;
+    // }
+    std::cout << std::format("Mybuf min/max: {}, {}\n", myBuf.min(), myBuf.max());
+    for (int i = 0; i < 10; ++i)
+    {
+        std::cout << myBuf[i] << std::endl;
+    }
+    std::cout << std::format("Mybuf min/max: {}, {}\n", myBuf.min(), myBuf.max());
+
     AppState state;
     dsp::gui::ImguiWindow imguiWindow("Signal Decomposition Demo");
     dsp::gui::ImguiContextEventHandlers contextHandlers = {
@@ -184,6 +199,6 @@ int main(int, char**)
     };
     imguiWindow.setImguiContextEventHandlers(contextHandlers);
     imguiWindow.initialize();
-    imguiWindow.run();
+    //imguiWindow.run();
     return 0;
 }
