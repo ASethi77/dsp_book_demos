@@ -31,12 +31,12 @@ struct AppState
 
 void Demo_SignalDecomposition(AppState& state)
 {
-    constexpr int NUM_POINTS = 25;
+    constexpr int NUM_POINTS = 26;
     static bool samplesInitialized = false;
     static dsp::StaticBuffer<double, NUM_POINTS> samples;
     if (!samplesInitialized)
     {
-        dsp::statistics::PopulateNormalDistribution(samples);
+        dsp::statistics::PopulateNormalDistribution(samples, 0.0, 0.25);
         samplesInitialized = true;
     }
     static ImPlotDragToolFlags flags = ImPlotDragToolFlags_None;
@@ -57,7 +57,7 @@ void Demo_SignalDecomposition(AppState& state)
     }
 
     ImGui::Spacing();
-    ImGui::BulletText("The subplots below show the even/odd decomposition of the input signal");
+    ImGui::BulletText("The subplots below show the even/odd decomposition of the input signal.");
 
     auto [evenDecompBuffer, oddDecompBuffer] = dsp::signals::decomposeEvenOdd(samples);
     if (ImPlot::BeginSubplots("Even/Odd Decomposition", 1, 2, {-1, 400}, subplotFlags))
