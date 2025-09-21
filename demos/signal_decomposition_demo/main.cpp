@@ -173,20 +173,6 @@ bool appStep(AppState& state)
 // Main code
 int main(int, char**)
 {
-    dsp::StaticBuffer<double, 10> myBuf = {
-        {0, 1, 2, 3, 4}
-    };
-    // for (int i = 0; i < 10; ++i)
-    // {
-    //     myBuf[i] = i;
-    // }
-    std::cout << std::format("Mybuf min/max: {}, {}\n", myBuf.min(), myBuf.max());
-    for (int i = 0; i < 10; ++i)
-    {
-        std::cout << myBuf[i] << std::endl;
-    }
-    std::cout << std::format("Mybuf min/max: {}, {}\n", myBuf.min(), myBuf.max());
-
     AppState state;
     dsp::gui::ImguiWindow imguiWindow("Signal Decomposition Demo");
     dsp::gui::ImguiContextEventHandlers contextHandlers = {
@@ -199,6 +185,6 @@ int main(int, char**)
     };
     imguiWindow.setImguiContextEventHandlers(contextHandlers);
     imguiWindow.initialize();
-    //imguiWindow.run();
+    imguiWindow.run();
     return 0;
 }
