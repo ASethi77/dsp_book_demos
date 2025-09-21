@@ -1,4 +1,5 @@
 #include "libdsp/gui/imgui_window.h"
+#include "libdsp/gui/text_helpers.h"
 #include "libdsp/storage/buffer.h"
 #include "libdsp/statistics/buffer_stats_helpers.h"
 #include "libdsp/signal_processing/signal_processing.h"
@@ -32,6 +33,19 @@ struct AppState
 
 void Demo_SignalDecomposition(AppState& state)
 {
+    TEXT_BULLET("-", "The subplots below show two versions of even/odd decomposition:");
+    {
+        ImGui::Indent();
+        TEXT_BULLET("-", "Even/odd decomposition: 'True' decomposition, resulting in an even signal symmetrical about the "
+                          "vertical axis at <Num Samples>/2, and an odd symmetrical about an origin of <Num Samples>/2. "
+                          "(Imagine rotating the second half of the signal CCW about <Num Samples>/2 and you'll see what "
+                          "I mean.) This would be the 'ideal' decomposition used for full Fourier transform calcs.");
+        TEXT_BULLET("-", "Interlaced decomposition: A simpler even/odd signal decomposition where the even signal "
+                          "is literally the even samples in the original signal and the odd signal is the odd samples. "
+                          "It seems simple, but is extremely useful for the FFT calculations we all use today.");
+        ImGui::Unindent();
+    }
+
     constexpr int NUM_POINTS = 26;
     static bool samplesInitialized = false;
     static dsp::StaticBuffer<double, NUM_POINTS> samples;
@@ -45,8 +59,8 @@ void Demo_SignalDecomposition(AppState& state)
     std::array<double, NUM_POINTS> xLabels{};
     std::iota(xLabels.begin(), xLabels.end(), 0);
 
-    ImGui::BulletText("Modify signal samples by clicking and dragging them.");
-    if (ImPlot::BeginPlot("Original Sample")) {
+    TEXT_BULLET("-", "Modify the original signal below by dragging points to see their effect on the even/odd decompositions.");
+    if (ImPlot::BeginPlot("Original signal")) {
         ImPlot::SetupAxes("Sample Number","Voltage");
         ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
         for (int i = 0; i < NUM_POINTS; ++i)
@@ -58,7 +72,6 @@ void Demo_SignalDecomposition(AppState& state)
     }
 
     ImGui::Spacing();
-    ImGui::BulletText("The subplots below show the even/odd decomposition of the input signal.");
 
     auto [evenDecompBuffer, oddDecompBuffer] = dsp::signals::decomposeEvenOdd(samples);
     if (ImPlot::BeginSubplots("Even/Odd Decomposition", 1, 2, {-1, 400}, subplotFlags))
@@ -83,24 +96,34 @@ void Demo_SignalDecomposition(AppState& state)
         ImPlot::EndPlot();
     }
     ImPlot::EndSubplots();
+
+    auto [evenInterlacedBuffer, oddInterlacedBuffer] = dsp::signals::decomposeInterlaced(samples);
+    if (ImPlot::BeginSubplots("Interlaced Decomposition", 1, 2, {-1, 400}, subplotFlags))
+    {
+        if (ImPlot::BeginPlot("Even Decomposition (Interlaced)"))
+        {
+            ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+            ImPlot::SetupAxesLimits(xLabels[0], xLabels[NUM_POINTS - 1],
+                std::min(evenInterlacedBuffer.min(), oddInterlacedBuffer.min()) - 0.25,
+                std::max(evenInterlacedBuffer.max(), oddInterlacedBuffer.max()) + 0.25);
+            ImPlot::PlotLine("v(t)", xLabels.data(), evenInterlacedBuffer._data.data(), NUM_POINTS);
+        }
+        ImPlot::EndPlot();
+        if (ImPlot::BeginPlot("Odd Decomposition (Interlaced)"))
+        {
+            ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+            ImPlot::SetupAxesLimits(xLabels[0], xLabels[NUM_POINTS - 1],
+            std::min(evenInterlacedBuffer.min(), oddInterlacedBuffer.min()) - 0.25,
+            std::max(evenInterlacedBuffer.max(), oddInterlacedBuffer.max()) + 0.25);
+            ImPlot::PlotLine("v(t)", xLabels.data(), oddInterlacedBuffer._data.data(), NUM_POINTS);
+        }
+        ImPlot::EndPlot();
+    }
+    ImPlot::EndSubplots();
 }
 
 bool appStep(AppState& state)
 {
-    auto& [show_demo_window, show_another_window, show_plot_window] = state;
-    auto& io = ImGui::GetIO();
-    ImVec4 clear_color = ImVec4(0.f, 0.f, 0.f, 1.00f);
-
-    if (show_plot_window)
-    {
-        ImPlot::ShowDemoWindow();
-    }
-
-    if (show_demo_window)
-    {
-        ImGui::ShowDemoWindow();
-    }
-
     ImGui::Begin("Filter Even/Odd Decomposition Demo");
 
     if (ImGui::CollapsingHeader("Demo Description"))
