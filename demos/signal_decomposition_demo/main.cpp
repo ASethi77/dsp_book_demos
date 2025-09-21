@@ -3,6 +3,7 @@
 #include "libdsp/gui/imgui_window.h"
 #include "libdsp/storage/buffer.h"
 #include "libdsp/statistics/buffer_stats_helpers.h"
+#include "libdsp/signal_processing/signal_processing.h"
 #include "implot.h"
 
 #include <iostream>
@@ -105,15 +106,7 @@ void Demo_LinePlots(AppState& state)
     ImGui::Spacing();
     ImGui::BulletText("The subplots below show the even/odd decomposition of the input signal");
 
-    dsp::StaticBuffer<double, NUM_POINTS> evenDecompBuffer = {0};
-    dsp::StaticBuffer<double, NUM_POINTS> oddDecompBuffer = {0};
-    for (int i = 1; i < NUM_POINTS; ++i)
-    {
-        double evenDecomp = (samples._data[i] + samples._data[NUM_POINTS - i]) / 2.f;
-        double oddDecomp = (samples._data[i] - samples._data[NUM_POINTS - i]) / 2.f;
-        evenDecompBuffer[i] = evenDecomp;
-        oddDecompBuffer[i] = oddDecomp;
-    }
+    auto [evenDecompBuffer, oddDecompBuffer] = dsp::signals::decomposeEvenOdd(samples);
     if (ImPlot::BeginSubplots("Even/Odd Decomposition", 1, 2, {-1, 400}, subplotFlags))
     {
         if (ImPlot::BeginPlot("Even Decomposition"))

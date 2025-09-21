@@ -7,4 +7,5 @@ target_link_libraries(signal_decomposition_demo
         implot::implot
         LibDsp::Stats
         LibDsp::Storage
+        LibDsp::Signals
         LibDsp::GUI)
