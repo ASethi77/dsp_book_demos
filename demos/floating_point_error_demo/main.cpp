@@ -1,5 +1,6 @@
 #include <iostream>
 #include <format>
+#include <string>
 #include <vector>
 #include <cstdint>
 #include <random>

@@ -4,6 +4,14 @@
 
 namespace dsp::statistics
 {
+    /**
+     * Ported from the ImPlot demo code. Generates a random sample from
+     * a normal distribution with a mean of 0 and a std. dev of 1.
+     *
+     * Note that this distribution is not randomly seeded, i.e. repeated runs of
+     * a program using this will create the same samples.
+     * @return The next random sample from the distribution.
+     */
     double RandomGauss()
     {
         static double V1, V2, S;

@@ -62,7 +62,6 @@ namespace dsp::gui
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
         SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-        // float main_scale = 1.5; // ImGui_ImplSDL2_GetContentScaleForDisplay(0);
         SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
             SDL_WINDOW_ALLOW_HIGHDPI);
         SDL_Window* window = SDL_CreateWindow(_windowTitle.c_str(), SDL_WINDOWPOS_CENTERED,

@@ -3,13 +3,12 @@ set(LIBDSP_SRC_DIR
 )
 
 set(LIBDSP_INC_DIR
-        ${PROJECT_SOURCE_DIR}/libdsp/include
+    ${PROJECT_SOURCE_DIR}/libdsp/include
 )
 
 set(DSP_GUI_SOURCES
     ${LIBDSP_SRC_DIR}/gui/imgui_window.cpp
     ${LIBDSP_SRC_DIR}/gui/implot_demo.cpp
-        include/libdsp/statistics/sample.h
 )
 add_library(dsp_gui ${DSP_GUI_SOURCES})
 target_include_directories(dsp_gui

@@ -1,5 +1,3 @@
-#include <format>
-
 #include "libdsp/gui/imgui_window.h"
 #include "libdsp/storage/buffer.h"
 #include "libdsp/statistics/buffer_stats_helpers.h"
@@ -8,6 +6,9 @@
 
 #include <iostream>
 #include <numeric>
+#include <string>
+#include <vector>
+#include <format>
 
 namespace
 {

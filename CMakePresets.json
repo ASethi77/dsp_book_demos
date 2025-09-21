@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 8,
   "cmakeMinimumRequired": {
     "major": 3,
     "minor": 21,
@@ -16,6 +16,39 @@
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
+    },
+    {
+      "name": "ci-ninja-linux",
+      "displayName": "CI Ninja Config (Linux)",
+      "description": "Configure with vcpkg toolchain and generate Ninja project files for all configurations (For GitHub CI)",
+      "binaryDir": "${sourceDir}/builds/${presetName}",
+      "generator": "Ninja",
+      "toolchainFile": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    },
+    {
+      "name": "ci-ninja-windows",
+      "displayName": "CI Ninja Config (Windows)",
+      "description": "Configure with vcpkg toolchain and generate Ninja project files for all configurations (For GitHub CI)",
+      "binaryDir": "${sourceDir}/builds/${presetName}",
+      "generator": "Visual Studio 17 2022",
+      "toolchainFile": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
     }
-  ]
+  ],
+  "buildPresets": [
+    {
+      "name": "ci-ninja-linux-release",
+      "configurePreset": "ci-ninja-linux",
+      "displayName": "Linux Build (Release)",
+      "description": "Linux Build with Ninja/vcpkg (Release)",
+      "configuration": "Release"
+    },
+    {
+      "name": "ci-ninja-windows-release",
+      "configurePreset": "ci-ninja-windows",
+      "displayName": "Windows Build (Release)",
+      "description": "Windows Build with Ninja/vcpkg (Release)",
+      "configuration": "Release"
+    }
+  ],
+  "workflowPresets": []
 }

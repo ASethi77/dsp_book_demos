@@ -13,6 +13,8 @@
 #include "implot.h"
 #include <stdio.h>
 #include <SDL.h>
+#include <string>
+#include <vector>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL_opengles2.h>
 #else
