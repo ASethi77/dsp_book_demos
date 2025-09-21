@@ -20,53 +20,6 @@ namespace
     {
         ImPlot::DestroyContext();
     }
-
-    double RandomGauss() {
-        static double V1, V2, S;
-        static int phase = 0;
-        double X;
-        if(phase == 0) {
-            do {
-                double U1 = (double)rand() / RAND_MAX;
-                double U2 = (double)rand() / RAND_MAX;
-                V1 = 2 * U1 - 1;
-                V2 = 2 * U2 - 1;
-                S = V1 * V1 + V2 * V2;
-            } while(S >= 1 || S == 0);
-
-            X = V1 * sqrt(-2 * log(S) / S);
-        } else
-            X = V2 * sqrt(-2 * log(S) / S);
-        phase = 1 - phase;
-        return X;
-    }
-
-    template <int N>
-    struct NormalDistribution {
-        NormalDistribution(double mean, double sd) {
-            for (int i = 0; i < N; ++i)
-                Data[i] = RandomGauss()*sd + mean;
-        }
-        double Min() const
-        {
-            double min = std::numeric_limits<double>::max();
-            for (int i = 0; i < N; ++i)
-            {
-                min = std::min(Data[i], min);
-            }
-            return min;
-        }
-        double Max() const
-        {
-            double max = std::numeric_limits<double>::min();
-            for (int i = 0; i < N; ++i)
-            {
-                max = std::max(Data[i], max);
-            }
-            return max;
-        }
-        double Data[N];
-    };
 }
 
 struct AppState
@@ -76,7 +29,7 @@ struct AppState
     bool show_plot_window = true;
 };
 
-void Demo_LinePlots(AppState& state)
+void Demo_SignalDecomposition(AppState& state)
 {
     constexpr int NUM_POINTS = 25;
     static bool samplesInitialized = false;
@@ -155,7 +108,7 @@ bool appStep(AppState& state)
     }
     if (ImGui::CollapsingHeader("Sample Signals"))
     {
-        Demo_LinePlots(state);
+        Demo_SignalDecomposition(state);
     }
 
     ImGui::End();
