@@ -107,7 +107,7 @@ void Demo_LinePlots(AppState& state)
 
     dsp::StaticBuffer<double, NUM_POINTS> evenDecompBuffer = {0};
     dsp::StaticBuffer<double, NUM_POINTS> oddDecompBuffer = {0};
-    for (int i = 0; i < NUM_POINTS; ++i)
+    for (int i = 1; i < NUM_POINTS; ++i)
     {
         double evenDecomp = (samples._data[i] + samples._data[NUM_POINTS - i]) / 2.f;
         double oddDecomp = (samples._data[i] - samples._data[NUM_POINTS - i]) / 2.f;
