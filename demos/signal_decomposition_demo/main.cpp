@@ -1,4 +1,6 @@
 #include "libdsp/gui/imgui_window.h"
+#include "libdsp/storage/buffer.h"
+#include "libdsp/statistics/buffer_stats_helpers.h"
 #include "implot.h"
 
 #include <iostream>
@@ -71,10 +73,16 @@ struct AppState
     bool show_plot_window = true;
 };
 
-void Demo_LinePlots()
+void Demo_LinePlots(AppState& state)
 {
     constexpr int NUM_POINTS = 25;
-    static NormalDistribution<NUM_POINTS> originalSamples(0, 0.2);
+    static bool samplesInitialized = false;
+    static dsp::StaticBuffer<double, NUM_POINTS> samples;
+    if (!samplesInitialized)
+    {
+        dsp::statistics::PopulateNormalDistribution(samples);
+        samplesInitialized = true;
+    }
     static ImPlotDragToolFlags flags = ImPlotDragToolFlags_None;
     static ImPlotSubplotFlags subplotFlags = ImPlotSubplotFlags_None;
     std::array<double, NUM_POINTS> xLabels{};
@@ -86,29 +94,24 @@ void Demo_LinePlots()
         ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
         for (int i = 0; i < NUM_POINTS; ++i)
         {
-            ImPlot::DragPoint(i, &xLabels[i], &originalSamples.Data[i], ImVec4(1, 1, 1, 1), 4, flags);
+            ImPlot::DragPoint(i, &xLabels[i], &samples._data[i], ImVec4(1, 1, 1, 1), 4, flags);
         }
-        ImPlot::PlotLine("v(t)", xLabels.data(), &originalSamples.Data[0], NUM_POINTS);
+        ImPlot::PlotLine("v(t)", xLabels.data(), &samples._data[0], NUM_POINTS);
         ImPlot::EndPlot();
     }
 
     ImGui::Spacing();
     ImGui::BulletText("The subplots below show the even/odd decomposition of the input signal");
 
-    std::array<double, NUM_POINTS> evenDecomposition = {0};
-    std::array<double, NUM_POINTS> oddDecomposition = {0};
-    std::pair<double, double> minMaxEven;
+    dsp::StaticBuffer<double, NUM_POINTS> evenDecompBuffer = {0};
+    dsp::StaticBuffer<double, NUM_POINTS> oddDecompBuffer = {0};
     std::pair<double, double> minMaxOdd;
     for (int i = 0; i < NUM_POINTS; ++i)
     {
-        double evenDecomp = (originalSamples.Data[i] + originalSamples.Data[NUM_POINTS - i]) / 2.f;
-        double oddDecomp = (originalSamples.Data[i] - originalSamples.Data[NUM_POINTS - i]) / 2.f;
-        evenDecomposition[i] = evenDecomp;
-        minMaxEven.first = std::min(minMaxEven.first, evenDecomp);
-        minMaxEven.second = std::max(minMaxEven.second, evenDecomp);
-        oddDecomposition[i] = oddDecomp;
-        minMaxOdd.first = std::min(minMaxOdd.first, oddDecomp);
-        minMaxOdd.second = std::max(minMaxOdd.second, oddDecomp);
+        double evenDecomp = (samples._data[i] + samples._data[NUM_POINTS - i]) / 2.f;
+        double oddDecomp = (samples._data[i] - samples._data[NUM_POINTS - i]) / 2.f;
+        evenDecompBuffer[i] = evenDecomp;
+        oddDecompBuffer[i] = oddDecomp;
     }
     if (ImPlot::BeginSubplots("Even/Odd Decomposition", 1, 2, {-1, 400}, subplotFlags))
     {
@@ -116,18 +119,18 @@ void Demo_LinePlots()
         {
             ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
             ImPlot::SetupAxesLimits(xLabels[0], xLabels[NUM_POINTS - 1],
-                std::min(minMaxEven.first, minMaxOdd.first) - 0.25,
-                std::max(minMaxEven.second, minMaxOdd.second) + 0.25);
-            ImPlot::PlotLine("v(t)", xLabels.data(), evenDecomposition.data(), NUM_POINTS);
+                std::min(evenDecompBuffer.min(), oddDecompBuffer.min()) - 0.25,
+                std::max(evenDecompBuffer.max(), oddDecompBuffer.max()) + 0.25);
+            ImPlot::PlotLine("v(t)", xLabels.data(), evenDecompBuffer._data.data(), NUM_POINTS);
         }
         ImPlot::EndPlot();
         if (ImPlot::BeginPlot("Odd Decomposition"))
         {
             ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
             ImPlot::SetupAxesLimits(xLabels[0], xLabels[NUM_POINTS - 1],
-            std::min(minMaxEven.first, minMaxOdd.first) - 0.25,
-            std::max(minMaxEven.second, minMaxOdd.second) + 0.25);
-            ImPlot::PlotLine("v(t)", xLabels.data(), oddDecomposition.data(), NUM_POINTS);
+            std::min(evenDecompBuffer.min(), oddDecompBuffer.min()) - 0.25,
+            std::max(evenDecompBuffer.max(), oddDecompBuffer.max()) + 0.25);
+            ImPlot::PlotLine("v(t)", xLabels.data(), oddDecompBuffer._data.data(), NUM_POINTS);
         }
         ImPlot::EndPlot();
     }
@@ -158,7 +161,7 @@ bool appStep(AppState& state)
     }
     if (ImGui::CollapsingHeader("Sample Signals"))
     {
-        Demo_LinePlots();
+        Demo_LinePlots(state);
     }
 
     ImGui::End();
