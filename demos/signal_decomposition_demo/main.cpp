@@ -63,11 +63,11 @@ void Demo_SignalDecomposition(AppState& state)
     if (ImPlot::BeginPlot("Original signal")) {
         ImPlot::SetupAxes("Sample Number","Voltage");
         ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+        ImPlot::PlotLine("v(t)", xLabels.data(), &samples._data[0], NUM_POINTS);
         for (int i = 0; i < NUM_POINTS; ++i)
         {
             ImPlot::DragPoint(i, &xLabels[i], &samples._data[i], ImVec4(1, 1, 1, 1), 4, flags);
         }
-        ImPlot::PlotLine("v(t)", xLabels.data(), &samples._data[0], NUM_POINTS);
         ImPlot::EndPlot();
     }
 

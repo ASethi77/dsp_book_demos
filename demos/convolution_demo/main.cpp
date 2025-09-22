@@ -69,7 +69,7 @@ void Demo_SignalDecomposition(AppState& state)
         }};
     }
 
-    static auto response = dsp::signals::convolve1D<double, INPUT_SIGNAL_LENGTH, IMPULSE_RESPONSE_LENGTH>(*originalSignal, *impulseResponse);
+    auto response = dsp::signals::convolve1D<double, INPUT_SIGNAL_LENGTH, IMPULSE_RESPONSE_LENGTH>(*originalSignal, *impulseResponse);
 
     static ImPlotDragToolFlags draggableFlags = ImPlotDragToolFlags_None;
     static ImPlotSubplotFlags subplotFlags = ImPlotSubplotFlags_None;
@@ -80,7 +80,9 @@ void Demo_SignalDecomposition(AppState& state)
     std::array<double, dsp::buffer_size(response)> outputLabels{};
     std::iota(outputLabels.begin(), outputLabels.end(), 0);
 
-    TEXT_BULLET("-", "Below is the input signal you'll be testing with.");
+    TEXT_BULLET("-", "Below is the data you'll be testing with.");
+    TEXT_BULLET("-", "The input signal on the left and the filter you'll be passing it through is on the right.")
+    TEXT_BULLET("-", "Drag the white markers on the filter to see how the filter affects the output signal at the bottom.");
     if (ImPlot::BeginSubplots("Signal and Impulse vs. Impulse Response", 1, 2, {-1, 400}, subplotFlags))
     {
         if (ImPlot::BeginPlot("Original Signal"))
@@ -95,7 +97,11 @@ void Demo_SignalDecomposition(AppState& state)
         {
             ImPlot::SetupAxes("Sample Number","Voltage");
             ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
-            ImPlot::PlotLine("v(t)", impulseResponseLabels.data(), &(impulseResponse->_data[0]), IMPULSE_RESPONSE_LENGTH);
+            ImPlot::PlotLine("v(t)", impulseResponseLabels.data(), &impulseResponse->_data[0], IMPULSE_RESPONSE_LENGTH);
+            for (int i = 0; i < impulseResponse->size(); ++i)
+            {
+                ImPlot::DragPoint(i, &impulseResponseLabels[i], &impulseResponse->_data[i], ImVec4(1, 1, 1, 1), 4, draggableFlags);
+            }
             ImPlot::EndPlot();
         }
     }

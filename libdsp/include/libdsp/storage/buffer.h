@@ -67,7 +67,7 @@ namespace dsp
         std::array<T, N> _data;
         std::optional<BufferStats<T>> _stats;
 
-        [[nodiscard]] consteval size_t size() const { return N; }
+        [[nodiscard]] constexpr size_t size() const { return N; }
 
         BufferEntry<T> operator[](unsigned long n)
         {

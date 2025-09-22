@@ -24,5 +24,5 @@ the book.
 |---------------------------|-------------------------------------------------------------------------------|
 | reference_implot_demo     | Literally a port of the ImPlot demo window. It's just around to help me code. |
 | floating_point_error_demo | Demo of floating point numerical error accumulation. See Chapter 4 pg 73.     |
-| signal_decomposition_demo | Demo of signal even/odd decomposition                                         |
-|                           |                                                                               |
+| signal_decomposition_demo | Interactive demo of signal even/odd decomposition                             |
+| convolution_demo          | Interactive demo of varying impulse responses on an input signal.             |
