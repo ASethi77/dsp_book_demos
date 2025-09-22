@@ -7,3 +7,6 @@ add_subdirectory(
 add_subdirectory(
     signal_decomposition_demo
 )
+add_subdirectory(
+    convolution_demo
+)

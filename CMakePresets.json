@@ -13,6 +13,7 @@
       "binaryDir": "${sourceDir}/build/${presetName}",
       "hidden": true,
       "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }

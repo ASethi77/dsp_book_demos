@@ -51,7 +51,7 @@ void Demo_SignalDecomposition(AppState& state)
     static dsp::StaticBuffer<double, NUM_POINTS> samples;
     if (!samplesInitialized)
     {
-        dsp::statistics::PopulateNormalDistribution(samples, 0.0, 0.25);
+        dsp::statistics::BatchSampleGaussian(samples, 0.0, 0.25);
         samplesInitialized = true;
     }
     static ImPlotDragToolFlags flags = ImPlotDragToolFlags_None;

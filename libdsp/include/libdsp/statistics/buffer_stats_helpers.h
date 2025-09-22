@@ -9,7 +9,7 @@
 namespace dsp::statistics
 {
     template<int N>
-    void PopulateNormalDistribution(StaticBuffer<double, N>& storage, double mean, double sdev)
+    void BatchSampleGaussian(StaticBuffer<double, N>& storage, double mean, double sdev)
     {
         std::random_device rd{};
         std::mt19937 gen{rd()};

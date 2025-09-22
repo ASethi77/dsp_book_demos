@@ -20,6 +20,39 @@ namespace dsp
         T maxValue = std::numeric_limits<T>::min();
     };
 
+    template<typename T, int N, bool WithStats>
+    class StaticBuffer;
+
+    /** Wraps operator[] to the backing std::array for
+     * live statistics calculations.
+     */
+    template<typename T, bool WithStats = true>
+    struct BufferEntry
+    {
+        std::reference_wrapper<T> _dataRef;
+        std::optional<BufferStats<T>>& _statsRef;
+        BufferEntry& operator=(const T& value)
+        {
+            _dataRef.get() = value;
+            if constexpr (WithStats)
+            {
+                _statsRef->minValue = std::min(_statsRef->minValue, value);
+                _statsRef->maxValue = std::max(_statsRef->maxValue, value);
+            }
+            return *this;
+        }
+        template<typename OtherT>
+        T operator*(const BufferEntry<OtherT>& other)
+        {
+            return _dataRef.get() * other._dataRef.get();
+        }
+        friend std::ostream& operator<< (std::ostream& os, const BufferEntry& b)
+        {
+            os << b._dataRef.get();
+            return os;
+        }
+    };
+
     /***
      * Static buffer. Wraps std::array<T, N> with a few extra
      * signal processing goodies such as running summary statistics.
@@ -34,31 +67,9 @@ namespace dsp
         std::array<T, N> _data;
         std::optional<BufferStats<T>> _stats;
 
-        /** Wraps operator[] to the backing std::array for
-         * live statistics calculations.
-         */
-        struct BufferEntry
-        {
-            std::reference_wrapper<T> _dataRef;
-            std::optional<BufferStats<T>>& _statsRef;
-            BufferEntry& operator=(const T& value)
-            {
-                _dataRef.get() = value;
-                if constexpr (WithStats)
-                {
-                    _statsRef->minValue = std::min(_statsRef->minValue, value);
-                    _statsRef->maxValue = std::max(_statsRef->maxValue, value);
-                }
-                return *this;
-            }
-            friend std::ostream& operator<< (std::ostream& os, const BufferEntry& b)
-            {
-                os << b._dataRef.get();
-                return os;
-            }
-        };
+        [[nodiscard]] consteval size_t size() const { return N; }
 
-        BufferEntry operator[](unsigned long n)
+        BufferEntry<T> operator[](unsigned long n)
         {
             {
                 return {
@@ -67,8 +78,6 @@ namespace dsp
                 };
             }
         }
-
-        [[nodiscard]] consteval size_t size() const { return N; }
 
         T min()
         {
@@ -95,7 +104,15 @@ namespace dsp
             }
             return _stats->maxValue;
         }
+
+
     };
+
+    template<typename T, int N, bool WithStats>
+    consteval int buffer_size(const StaticBuffer<T, N, WithStats>&)
+    {
+        return N;
+    }
 }
 
 #endif //SIGNAL_PROCESSING_BOOK_BUFFER_H
